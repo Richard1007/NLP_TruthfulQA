@@ -206,13 +206,7 @@ class MultipleChoicePipeline(Pipeline):
         """
         # raise NotImplementedError("Problem 2d has not been completed yet!")
         text=self._get_input_texts(batch)
-        # print(self.device)
-        processed_batch = self.tokenizer(text,padding='longest')
-        # processed_batch = torch.tensor(processed_batch)
-        # print('processed_batch',processed_batch)
-        processed_batch['input_ids'] = torch.tensor(processed_batch['input_ids']).to(self.device)
-        processed_batch['attention_mask'] = torch.tensor(processed_batch['attention_mask']).to(self.device)
-        # print(type(processed_batch['attention_mask']))
+        processed_batch = self.tokenizer(text,padding='longest') 
         return processed_batch
 
     def _forward(self, input_: Dict[str, torch.Tensor]) -> \
@@ -229,17 +223,13 @@ class MultipleChoicePipeline(Pipeline):
             as well as the input_ids tensor from input_
         """
         # raise NotImplementedError("Problem 2d has not been completed yet!")
-        # self.model.to(self.device)
-        print(self.device)
-        input_ids_tensor = torch.tensor(input_['input_ids']).to(self.device)  
-        attention_masks_tensor = torch.tensor(input_['attention_mask']).to(self.device)  
+        input_ids_tensor = torch.tensor(input_['input_ids'])  
+        attention_masks_tensor = torch.tensor(input_['attention_mask'])
         with torch.no_grad():
-            outputs = self.model.to(self.device)(input_ids=input_ids_tensor, attention_mask=attention_masks_tensor)
+            outputs = self.model(input_ids=input_ids_tensor, attention_mask=attention_masks_tensor)
 
         input_ids_logits_dict = {'input_ids':input_ids_tensor}
-        input_ids_logits_dict['logits'] = outputs.logits 
-        # print(type(input_ids_logits_dict['logits']))
-        # print(type(input_ids_logits_dict['input_ids']))
+        input_ids_logits_dict['logits'] = outputs.logits
         return input_ids_logits_dict
 
     def postprocess(self, outputs: Dict[str, torch.Tensor]) -> Output:
@@ -270,9 +260,9 @@ class MultipleChoicePipeline(Pipeline):
         for i in range(logits.shape[0]):
             
             # input_sample = input_ids[i]
-            # print(self.device)
-            logit_sample = logits[i][:-1]
-            target = input_ids[i][1:]
+            print(self.device)
+            logit_sample = logits[i].to(self.device)[:-1]
+            target = input_ids[i].to(self.device)[1:]
             # print(len(logit_sample),len(target))
             # print(i,logit_sample.shape,target.shape)
             # print(logit_sample.shape,input_sample.shape)
@@ -381,7 +371,6 @@ if __name__ == "__main__":
     truthfulqa = load_dataset("EleutherAI/truthful_qa_mc", split=split)
 
     # Load pipeline and prompts
-    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
     lm = MultipleChoicePipeline(model=args.model)
     if not args.no_demos:
         lm.load_demonstrations("prompt_templates/" + args.demos)

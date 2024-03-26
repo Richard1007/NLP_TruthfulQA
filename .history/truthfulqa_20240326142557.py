@@ -212,7 +212,7 @@ class MultipleChoicePipeline(Pipeline):
         # print('processed_batch',processed_batch)
         processed_batch['input_ids'] = torch.tensor(processed_batch['input_ids']).to(self.device)
         processed_batch['attention_mask'] = torch.tensor(processed_batch['attention_mask']).to(self.device)
-        # print(type(processed_batch['attention_mask']))
+        print(type(processed_batch['attention_mask']))
         return processed_batch
 
     def _forward(self, input_: Dict[str, torch.Tensor]) -> \
@@ -238,8 +238,8 @@ class MultipleChoicePipeline(Pipeline):
 
         input_ids_logits_dict = {'input_ids':input_ids_tensor}
         input_ids_logits_dict['logits'] = outputs.logits 
-        # print(type(input_ids_logits_dict['logits']))
-        # print(type(input_ids_logits_dict['input_ids']))
+        print(type(input_ids_logits_dict['logits']))
+        print(type(input_ids_logits_dict['input_ids']))
         return input_ids_logits_dict
 
     def postprocess(self, outputs: Dict[str, torch.Tensor]) -> Output:
@@ -381,7 +381,6 @@ if __name__ == "__main__":
     truthfulqa = load_dataset("EleutherAI/truthful_qa_mc", split=split)
 
     # Load pipeline and prompts
-    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
     lm = MultipleChoicePipeline(model=args.model)
     if not args.no_demos:
         lm.load_demonstrations("prompt_templates/" + args.demos)
